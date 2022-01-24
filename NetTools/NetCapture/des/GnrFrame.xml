@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="GB2312"?>
+<Frame>
+    <Inst InstName="Frame" ClassName="PcapDesNode" isLittleEndian="1" isOptional="0" hasTag="0" TagLen="0" TagValue="00000000">
+        <Inst InstName="DstMac" ClassName="PcapDesMacNode" isLittleEndian="1" isOptional="0" hasTag="0" TagLen="0" TagValue="00000000"/>
+        <Inst InstName="SurMac" ClassName="PcapDesMacNode" isLittleEndian="1" isOptional="0" hasTag="0" TagLen="0" TagValue="00000000"/>
+        <Inst InstName="VLan" ClassName="PcapDesVlanNode" isLittleEndian="1" isOptional="0" hasTag="1" TagLen="2" TagValue="00008100"/>
+        <Inst InstName="EthType" ClassName="PcapHex16ValueNode" isLittleEndian="0" isOptional="0" hasTag="0" TagLen="0" TagValue="00000000"/>
+    </Inst>
+</Frame>
+
+<DataType>
+    <Type ClassName="PcapDesNode" Des="空节点"/>
+    <Type ClassName="PcapDesMacNode" Des="MAC地址"/>
+    <Type ClassName="PcapUInt8ValueNode" Des="无符号8位"/>
+    <Type ClassName="PcapUInt16ValueNode" Des="无符号16位"/>
+    <Type ClassName="PcapUInt32ValueNode" Des="无符号32位"/>
+    <Type ClassName="PcapUInt64ValueNode" Des="无符号64位"/>
+    <Type ClassName="PcapInt8ValueNode" Des="有符号8位"/>
+    <Type ClassName="PcapInt16ValueNode" Des="有符号16位"/>
+    <Type ClassName="PcapInt32ValueNode" Des="有符号32位"/>
+    <Type ClassName="PcapInt64ValueNode" Des="有符号64位"/>
+    <Type ClassName="PcapHex8ValueNode" Des="16进制8位"/>
+    <Type ClassName="PcapHex16ValueNode" Des="16进制16位"/>
+    <Type ClassName="PcapHex32ValueNode" Des="16进制32位"/>
+    <Type ClassName="PcapHex64ValueNode" Des="16进制64位"/>
+    <Type ClassName="PcapDesVlanNode" Des="VLAN"/>
+    <Type ClassName="PcapDesPriUtcNode" Des="私有UTC时间戳"/>
+</DataType>

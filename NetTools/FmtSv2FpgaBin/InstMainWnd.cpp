@@ -8,7 +8,6 @@ InstMainWnd::InstMainWnd()
 {
 }
 
-
 struct SvFrame
 {
 	int32 unpackFrame(const uint8* EhnetPcak)
@@ -49,6 +48,12 @@ struct SvFrame
 				offset += 1;
 				pduLen = EhnetPcak[offset];
 				offset += 1;
+			}
+			else if (EhnetPcak[offset] == 0x82)
+			{
+				offset += 1;
+				ChangeEndian(&pduLen, (void*)&EhnetPcak[offset], sizeof(appLen));
+				offset += 2;
 			}
 			else
 			{
@@ -93,6 +98,12 @@ struct SvFrame
 				sizeAsdu = EhnetPcak[offset];
 				offset += 1;
 			}
+			else if (EhnetPcak[offset] == 0x82)
+			{
+				offset += 1;
+				ChangeEndian(&sizeAsdu, (void*)&EhnetPcak[offset], sizeof(appLen));
+				offset += 2;
+			}
 			else
 			{
 				return -1;
@@ -115,6 +126,12 @@ struct SvFrame
 				offset += 1;
 				asdu1Len = EhnetPcak[offset];
 				offset += 1;
+			}
+			else if (EhnetPcak[offset] == 0x82)
+			{
+				offset += 1;
+				ChangeEndian(&asdu1Len, (void*)&EhnetPcak[offset], sizeof(appLen));
+				offset += 2;
 			}
 			else
 			{
@@ -319,29 +336,31 @@ void InstMainWnd::FmtSv2FpgaBin(wxCommandEvent& event)
 			{
 				psvs->svFrame[0].unpackFrame(pkt_data);
 				psvs->frameNum = 1;
+				while ((res = pcap_next_ex(fp, &header, &pkt_data)) >= 0)
+				{
+					psvs->svFrame[psvs->frameNum].unpackFrame(pkt_data);
+					if ((psvs->svFrame[psvs->frameNum].frameok == 1) && (psvs->svFrame[psvs->frameNum].appid == psvs->templateFrame.appid))
+					{
+						psvs->frameNum++;
+						if (psvs->frameNum >= M_ArrLen(psvs->svFrame))
+						{
+							break;
+						}
+					}
+				}
 				break;
 			}
 		}
-		while ((res = pcap_next_ex(fp, &header, &pkt_data)) >= 0)
-		{
-			psvs->svFrame[psvs->frameNum].unpackFrame(pkt_data);
-			if ((psvs->svFrame[psvs->frameNum].frameok == 1) && (psvs->svFrame[psvs->frameNum].appid == psvs->templateFrame.appid))
-			{
-				psvs->frameNum++;
-				if (psvs->frameNum >= M_ArrLen(psvs->svFrame))
-				{
-					break;
-				}
-			}
-		}
-		wxString str;
-		str = ".\\out";
-		CreateDirectory(str.c_str(), 0);
+		wxString path;
+		path = dia.GetPath();
+		path.Replace(".", "_");
+		CreateDirectory(path.c_str(), 0);
 		uint32 endloop = psvs->templateFrame.sizeOfData / 8;
 		for (uint32 i = 0; i < endloop; i++)
 		{
 			String200B str;
-			str = ".\\out\\";
+			str = path.c_str();
+			str << "\\";
 			str << dia.GetFilename() << i << ".txt";
 			FILE* f = fopen(str.Str(), "w");
 			if (!f)

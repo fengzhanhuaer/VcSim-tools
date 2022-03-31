@@ -13,7 +13,9 @@ protected:
 class MainWndInst :public MainWnd
 {
 public:
-	MainWndInst() :MainWnd(0) {}
+	MainWndInst() :MainWnd(0) {
+		SetTitle(GetTitle() + "-20220329");
+	}
 protected:
 	// Virtual event handlers, override them in your derived class
 	virtual void SelectFile(wxCommandEvent& event)
@@ -24,9 +26,10 @@ protected:
 		{
 			wxString path = dialog.GetPath();
 			int filterIndex = dialog.GetFilterIndex();
-			Path->SetLabelText(path);
+			Path->SetValue(path);
 			Path->SetSelection(path.Len(), path.Len() + 1);
 		}
+		dialog.Close();
 		event.Skip();
 	}
 	virtual void TypeChange(wxCommandEvent& event)
@@ -39,21 +42,21 @@ protected:
 			}
 			else if (ProgramType->GetStringSelection() == "Sylix.T3BSP.Gzk")
 			{
-				ProgramName->SetLabelText(ProgramType->GetStringSelection());
+				ProgramName->SetValue(ProgramType->GetStringSelection());
 				sizeM->SetValue(5);
 				sizeK->SetValue(0);
 				sizeB->SetValue(0);
 			}
 			else if (ProgramType->GetStringSelection() == "Sylix.Boot0")
 			{
-				ProgramName->SetLabelText(ProgramType->GetStringSelection());
+				ProgramName->SetValue(ProgramType->GetStringSelection());
 				sizeM->SetValue(0);
 				sizeK->SetValue(64);
 				sizeB->SetValue(0);
 			}
 			else if (ProgramType->GetStringSelection() == "Sylix.UBoot")
 			{
-				ProgramName->SetLabelText(ProgramType->GetStringSelection());
+				ProgramName->SetValue(ProgramType->GetStringSelection());
 				sizeM->SetValue(1);
 				sizeK->SetValue(704);
 				sizeB->SetValue(0);
@@ -70,12 +73,12 @@ protected:
 		{
 			fmt.Clear();
 			fmt.FormatHex((uint16)version.crc);
-			tCrc->SetLabelText(fmt.Str());
+			tCrc->SetValue(fmt.Str());
 			Vmajor->SetValue(version.major);
 			Vminor->SetValue(version.minor);
 			Vdel->SetValue(version.reversion);
-			ProgramName->SetLabelText(version.programName);
-			Prger->SetLabelText(version.publisher);
+			ProgramName->SetValue(version.programName);
+			Prger->SetValue(version.publisher);
 			sizeM->SetValue(version.fileSize / 1024 / 1024);
 			sizeK->SetValue(version.fileSize / 1024 % 1024);
 			sizeB->SetValue(version.fileSize % 1024);
@@ -98,14 +101,14 @@ protected:
 			Vmajor->GetValue(),
 			Vminor->GetValue(),
 			Vdel->GetValue(),
-			ProgramName->GetLabelText(),
-			Prger->GetLabelText(),
+			ProgramName->GetValue(),
+			Prger->GetValue(),
 			stamp.fromUtcSec(m_datePicker1->GetValue().GetDateOnly().GetTicks() + m_timePicker1->GetValue().GetTicks() - m_timePicker1->GetValue().GetDateOnly().GetTicks())
 		);
-		file.CreatBin(Path->GetLabelText(), version);
+		file.CreatBin(Path->GetValue(), version);
 		fmt.Clear();
 		fmt.FormatHex((uint16)version.crc);
-		tCrc->SetLabelText(fmt.Str());
+		tCrc->SetValue(fmt.Str());
 		event.Skip();
 	}
 };

@@ -25,14 +25,16 @@
 #include <wx/timer.h>
 #include <wx/statusbr.h>
 #include <wx/frame.h>
-#include <wx/choice.h>
-#include <wx/stattext.h>
 #include <wx/spinctrl.h>
+#include <wx/statbox.h>
+#include <wx/checkbox.h>
+#include <wx/choice.h>
 #include <wx/richtext/richtextctrl.h>
 #include <wx/panel.h>
-#include <wx/notebook.h>
 #include <wx/grid.h>
-#include <wx/statbox.h>
+#include <wx/dataview.h>
+#include <wx/listbook.h>
+#include <wx/listctrl.h>
 #include <wx/dialog.h>
 
 ///////////////////////////////////////////////////////////////////////////
@@ -51,6 +53,7 @@ class MainWnd : public wxFrame
 		wxToolBar* m_toolBar1;
 		wxTextCtrl* ServerIp;
 		wxButton* m_button1;
+		wxBoxSizer* RootBox;
 		wxTimer WndUpdate;
 		wxTimer StatusTimer;
 		wxStatusBar* m_statusBar1;
@@ -71,97 +74,86 @@ class MainWnd : public wxFrame
 };
 
 ///////////////////////////////////////////////////////////////////////////////
-/// Class TextPage
+/// Class TextWnd
 ///////////////////////////////////////////////////////////////////////////////
-class TextPage : public wxPanel
+class TextWnd : public wxPanel
 {
 	private:
 
 	protected:
-		wxToolBar* m_toolBar2;
-		wxChoice* UpdateMode;
-		wxStaticText* PeriodMs;
-		wxSpinCtrl* Period;
-		wxStaticText* UpdatePara;
-		wxSpinCtrl* m_spinCtrl3;
-		wxButton* ManualUpdate;
-		wxButton* ManualSet;
-		wxRichTextCtrl* m_richText1;
+		wxSpinCtrlDouble* dPara1;
+		wxSpinCtrlDouble* dPara2;
+		wxSpinCtrlDouble* dPara3;
+		wxCheckBox* Check1;
+		wxCheckBox* Check2;
+		wxCheckBox* Check3;
+		wxButton* Button1;
+		wxButton* Button2;
+		wxButton* Button3;
+		wxChoice* updateMode;
+		wxButton* UpdateButton;
+		wxRichTextCtrl* text;
 
 	public:
 
-		TextPage( wxWindow* parent, wxWindowID id = wxID_ANY, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 692,538 ), long style = wxTAB_TRAVERSAL, const wxString& name = wxEmptyString );
+		TextWnd( wxWindow* parent, wxWindowID id = wxID_ANY, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 1100,673 ), long style = wxTAB_TRAVERSAL, const wxString& name = wxEmptyString );
 
-		~TextPage();
+		~TextWnd();
 
 };
 
 ///////////////////////////////////////////////////////////////////////////////
-/// Class CascadePage
+/// Class GridWnd
 ///////////////////////////////////////////////////////////////////////////////
-class CascadePage : public wxPanel
+class GridWnd : public wxPanel
 {
 	private:
 
 	protected:
-		wxNotebook* m_notebook2;
+		wxGrid* m_grid;
 
 	public:
 
-		CascadePage( wxWindow* parent, wxWindowID id = wxID_ANY, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 500,300 ), long style = wxTAB_TRAVERSAL, const wxString& name = wxEmptyString );
+		GridWnd( wxWindow* parent, wxWindowID id = wxID_ANY, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 500,300 ), long style = wxTAB_TRAVERSAL, const wxString& name = wxEmptyString );
 
-		~CascadePage();
+		~GridWnd();
 
 };
 
 ///////////////////////////////////////////////////////////////////////////////
-/// Class GridPage
+/// Class MyPanel10
 ///////////////////////////////////////////////////////////////////////////////
-class GridPage : public wxPanel
+class MyPanel10 : public wxPanel
 {
 	private:
 
 	protected:
-		wxToolBar* m_toolBar2;
-		wxChoice* UpdateMode;
-		wxStaticText* PeriodMs;
-		wxSpinCtrl* Period;
-		wxStaticText* UpdatePara;
-		wxSpinCtrl* m_spinCtrl3;
-		wxButton* ManualUpdate;
-		wxButton* ManualSet;
-		wxGrid* m_grid1;
+		wxDataViewListCtrl* m_dataViewListCtrl000;
 
 	public:
 
-		GridPage( wxWindow* parent, wxWindowID id = wxID_ANY, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 968,532 ), long style = wxTAB_TRAVERSAL, const wxString& name = wxEmptyString );
+		MyPanel10( wxWindow* parent, wxWindowID id = wxID_ANY, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 500,300 ), long style = wxTAB_TRAVERSAL, const wxString& name = wxEmptyString );
 
-		~GridPage();
+		~MyPanel10();
 
 };
 
 ///////////////////////////////////////////////////////////////////////////////
-/// Class SetPage
+/// Class CascadeWnd
 ///////////////////////////////////////////////////////////////////////////////
-class SetPage : public wxPanel
+class CascadeWnd : public wxPanel
 {
 	private:
 
 	protected:
-		wxToolBar* m_toolBar2;
-		wxChoice* UpdateMode;
-		wxStaticText* PeriodMs;
-		wxSpinCtrl* Period;
-		wxStaticText* UpdatePara;
-		wxSpinCtrl* m_spinCtrl3;
-		wxButton* ManualUpdate;
-		wxButton* ManualSet;
+		wxListbook* ListPage;
+		wxPanel* m_panel000;
 
 	public:
 
-		SetPage( wxWindow* parent, wxWindowID id = wxID_ANY, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 762,525 ), long style = wxTAB_TRAVERSAL, const wxString& name = wxEmptyString );
+		CascadeWnd( wxWindow* parent, wxWindowID id = wxID_ANY, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 834,595 ), long style = wxTAB_TRAVERSAL, const wxString& name = wxEmptyString );
 
-		~SetPage();
+		~CascadeWnd();
 
 };
 

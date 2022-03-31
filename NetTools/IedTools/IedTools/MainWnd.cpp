@@ -30,11 +30,10 @@ MainWnd::MainWnd( wxWindow* parent, wxWindowID id, const wxString& title, const 
 	m_toolBar1->AddControl( m_button1 );
 	m_toolBar1->Realize();
 
-	wxBoxSizer* bSizer1;
-	bSizer1 = new wxBoxSizer( wxVERTICAL );
+	RootBox = new wxBoxSizer( wxVERTICAL );
 
 
-	this->SetSizer( bSizer1 );
+	this->SetSizer( RootBox );
 	this->Layout();
 	WndUpdate.SetOwner( this, wxID_ANY );
 	StatusTimer.SetOwner( this, wxID_ANY );
@@ -60,162 +59,190 @@ MainWnd::~MainWnd()
 
 }
 
-TextPage::TextPage( wxWindow* parent, wxWindowID id, const wxPoint& pos, const wxSize& size, long style, const wxString& name ) : wxPanel( parent, id, pos, size, style, name )
+TextWnd::TextWnd( wxWindow* parent, wxWindowID id, const wxPoint& pos, const wxSize& size, long style, const wxString& name ) : wxPanel( parent, id, pos, size, style, name )
 {
-	wxBoxSizer* bSizer3;
-	bSizer3 = new wxBoxSizer( wxVERTICAL );
+	wxBoxSizer* bSizer;
+	bSizer = new wxBoxSizer( wxVERTICAL );
 
-	m_toolBar2 = new wxToolBar( this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTB_HORIZONTAL );
-	wxString UpdateModeChoices[] = { wxT("手动刷新"), wxT("周期刷新") };
-	int UpdateModeNChoices = sizeof( UpdateModeChoices ) / sizeof( wxString );
-	UpdateMode = new wxChoice( m_toolBar2, wxID_ANY, wxDefaultPosition, wxDefaultSize, UpdateModeNChoices, UpdateModeChoices, 0 );
-	UpdateMode->SetSelection( 0 );
-	m_toolBar2->AddControl( UpdateMode );
-	PeriodMs = new wxStaticText( m_toolBar2, wxID_ANY, wxT("刷新周期(Ms):"), wxDefaultPosition, wxDefaultSize, 0 );
-	PeriodMs->Wrap( -1 );
-	m_toolBar2->AddControl( PeriodMs );
-	Period = new wxSpinCtrl( m_toolBar2, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT, 100, 100000000, 1000 );
-	m_toolBar2->AddControl( Period );
-	UpdatePara = new wxStaticText( m_toolBar2, wxID_ANY, wxT("参数:"), wxDefaultPosition, wxDefaultSize, 0 );
-	UpdatePara->Wrap( -1 );
-	m_toolBar2->AddControl( UpdatePara );
-	m_spinCtrl3 = new wxSpinCtrl( m_toolBar2, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, -2147483648, 2147483647, 0 );
-	m_toolBar2->AddControl( m_spinCtrl3 );
-	ManualUpdate = new wxButton( m_toolBar2, wxID_ANY, wxT("刷新"), wxDefaultPosition, wxDefaultSize, 0 );
-	m_toolBar2->AddControl( ManualUpdate );
-	ManualSet = new wxButton( m_toolBar2, wxID_ANY, wxT("设置"), wxDefaultPosition, wxDefaultSize, 0 );
-	m_toolBar2->AddControl( ManualSet );
-	m_toolBar2->Realize();
+	wxStaticBoxSizer* panelCtrl;
+	panelCtrl = new wxStaticBoxSizer( new wxStaticBox( this, wxID_ANY, wxT("label") ), wxHORIZONTAL );
 
-	bSizer3->Add( m_toolBar2, 0, wxEXPAND, 5 );
+	wxStaticBoxSizer* sbdPara1;
+	sbdPara1 = new wxStaticBoxSizer( new wxStaticBox( panelCtrl->GetStaticBox(), wxID_ANY, wxT("label") ), wxVERTICAL );
 
-	m_richText1 = new wxRichTextCtrl( this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0|wxVSCROLL|wxHSCROLL|wxNO_BORDER|wxWANTS_CHARS );
-	bSizer3->Add( m_richText1, 1, wxEXPAND | wxALL, 5 );
+	dPara1 = new wxSpinCtrlDouble( sbdPara1->GetStaticBox(), wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 0, 100, 0, 1 );
+	dPara1->SetDigits( 0 );
+	dPara1->Enable( false );
+
+	sbdPara1->Add( dPara1, 1, wxALL|wxEXPAND, 5 );
 
 
-	this->SetSizer( bSizer3 );
+	panelCtrl->Add( sbdPara1, 1, wxEXPAND, 5 );
+
+	wxStaticBoxSizer* sbdPara2;
+	sbdPara2 = new wxStaticBoxSizer( new wxStaticBox( panelCtrl->GetStaticBox(), wxID_ANY, wxT("label") ), wxVERTICAL );
+
+	dPara2 = new wxSpinCtrlDouble( sbdPara2->GetStaticBox(), wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 0, 100, 0, 1 );
+	dPara2->SetDigits( 0 );
+	sbdPara2->Add( dPara2, 0, wxALL, 5 );
+
+
+	panelCtrl->Add( sbdPara2, 1, wxEXPAND, 5 );
+
+	wxStaticBoxSizer* sbdPara3;
+	sbdPara3 = new wxStaticBoxSizer( new wxStaticBox( panelCtrl->GetStaticBox(), wxID_ANY, wxT("label") ), wxVERTICAL );
+
+	dPara3 = new wxSpinCtrlDouble( sbdPara3->GetStaticBox(), wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 0, 100, 0, 1 );
+	dPara3->SetDigits( 0 );
+	dPara3->Enable( false );
+
+	sbdPara3->Add( dPara3, 1, wxALL|wxEXPAND, 5 );
+
+
+	panelCtrl->Add( sbdPara3, 1, wxEXPAND, 5 );
+
+	Check1 = new wxCheckBox( panelCtrl->GetStaticBox(), wxID_ANY, wxT("Check Me!"), wxDefaultPosition, wxDefaultSize, 0 );
+	Check1->Enable( false );
+
+	panelCtrl->Add( Check1, 1, wxALL|wxALIGN_CENTER_VERTICAL, 5 );
+
+	Check2 = new wxCheckBox( panelCtrl->GetStaticBox(), wxID_ANY, wxT("Check Me!"), wxDefaultPosition, wxDefaultSize, 0 );
+	Check2->Enable( false );
+
+	panelCtrl->Add( Check2, 1, wxALL|wxALIGN_CENTER_VERTICAL, 5 );
+
+	Check3 = new wxCheckBox( panelCtrl->GetStaticBox(), wxID_ANY, wxT("Check Me!"), wxDefaultPosition, wxDefaultSize, 0 );
+	Check3->Enable( false );
+
+	panelCtrl->Add( Check3, 1, wxALL|wxALIGN_CENTER_VERTICAL, 5 );
+
+	Button1 = new wxButton( panelCtrl->GetStaticBox(), wxID_ANY, wxT("MyButton"), wxDefaultPosition, wxDefaultSize, 0 );
+	Button1->Enable( false );
+
+	panelCtrl->Add( Button1, 1, wxALL|wxALIGN_CENTER_VERTICAL, 5 );
+
+	Button2 = new wxButton( panelCtrl->GetStaticBox(), wxID_ANY, wxT("MyButton"), wxDefaultPosition, wxDefaultSize, 0 );
+	Button2->Enable( false );
+
+	panelCtrl->Add( Button2, 1, wxALL|wxALIGN_CENTER_VERTICAL, 5 );
+
+	Button3 = new wxButton( panelCtrl->GetStaticBox(), wxID_ANY, wxT("MyButton"), wxDefaultPosition, wxDefaultSize, 0 );
+	Button3->Enable( false );
+
+	panelCtrl->Add( Button3, 1, wxALL|wxALIGN_CENTER_VERTICAL, 5 );
+
+	wxString updateModeChoices[] = { wxT("手动刷新"), wxT("自动刷新") };
+	int updateModeNChoices = sizeof( updateModeChoices ) / sizeof( wxString );
+	updateMode = new wxChoice( panelCtrl->GetStaticBox(), wxID_ANY, wxDefaultPosition, wxDefaultSize, updateModeNChoices, updateModeChoices, 0 );
+	updateMode->SetSelection( 0 );
+	panelCtrl->Add( updateMode, 0, wxALL|wxALIGN_CENTER_VERTICAL, 5 );
+
+	UpdateButton = new wxButton( panelCtrl->GetStaticBox(), wxID_ANY, wxT("刷新"), wxDefaultPosition, wxDefaultSize, 0 );
+	panelCtrl->Add( UpdateButton, 0, wxALL|wxALIGN_CENTER_VERTICAL, 5 );
+
+
+	bSizer->Add( panelCtrl, 0, wxEXPAND, 5 );
+
+	text = new wxRichTextCtrl( this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_READONLY|wxVSCROLL|wxHSCROLL|wxNO_BORDER|wxWANTS_CHARS );
+	bSizer->Add( text, 1, wxEXPAND | wxALL, 5 );
+
+
+	this->SetSizer( bSizer );
 	this->Layout();
 }
 
-TextPage::~TextPage()
+TextWnd::~TextWnd()
 {
 }
 
-CascadePage::CascadePage( wxWindow* parent, wxWindowID id, const wxPoint& pos, const wxSize& size, long style, const wxString& name ) : wxPanel( parent, id, pos, size, style, name )
+GridWnd::GridWnd( wxWindow* parent, wxWindowID id, const wxPoint& pos, const wxSize& size, long style, const wxString& name ) : wxPanel( parent, id, pos, size, style, name )
 {
-	wxBoxSizer* bSizer4;
-	bSizer4 = new wxBoxSizer( wxVERTICAL );
+	wxBoxSizer* bSizer;
+	bSizer = new wxBoxSizer( wxVERTICAL );
 
-	m_notebook2 = new wxNotebook( this, wxID_ANY, wxDefaultPosition, wxDefaultSize, 0 );
-
-	bSizer4->Add( m_notebook2, 1, wxEXPAND | wxALL, 5 );
-
-
-	this->SetSizer( bSizer4 );
-	this->Layout();
-}
-
-CascadePage::~CascadePage()
-{
-}
-
-GridPage::GridPage( wxWindow* parent, wxWindowID id, const wxPoint& pos, const wxSize& size, long style, const wxString& name ) : wxPanel( parent, id, pos, size, style, name )
-{
-	wxBoxSizer* bSizer5;
-	bSizer5 = new wxBoxSizer( wxVERTICAL );
-
-	m_toolBar2 = new wxToolBar( this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTB_HORIZONTAL );
-	wxString UpdateModeChoices[] = { wxT("手动刷新"), wxT("周期刷新") };
-	int UpdateModeNChoices = sizeof( UpdateModeChoices ) / sizeof( wxString );
-	UpdateMode = new wxChoice( m_toolBar2, wxID_ANY, wxDefaultPosition, wxDefaultSize, UpdateModeNChoices, UpdateModeChoices, 0 );
-	UpdateMode->SetSelection( 0 );
-	m_toolBar2->AddControl( UpdateMode );
-	PeriodMs = new wxStaticText( m_toolBar2, wxID_ANY, wxT("刷新周期(Ms):"), wxDefaultPosition, wxDefaultSize, 0 );
-	PeriodMs->Wrap( -1 );
-	m_toolBar2->AddControl( PeriodMs );
-	Period = new wxSpinCtrl( m_toolBar2, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT, 100, 100000000, 1000 );
-	m_toolBar2->AddControl( Period );
-	UpdatePara = new wxStaticText( m_toolBar2, wxID_ANY, wxT("参数:"), wxDefaultPosition, wxDefaultSize, 0 );
-	UpdatePara->Wrap( -1 );
-	m_toolBar2->AddControl( UpdatePara );
-	m_spinCtrl3 = new wxSpinCtrl( m_toolBar2, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, -2147483648, 2147483647, 0 );
-	m_toolBar2->AddControl( m_spinCtrl3 );
-	ManualUpdate = new wxButton( m_toolBar2, wxID_ANY, wxT("刷新"), wxDefaultPosition, wxDefaultSize, 0 );
-	m_toolBar2->AddControl( ManualUpdate );
-	ManualSet = new wxButton( m_toolBar2, wxID_ANY, wxT("设置"), wxDefaultPosition, wxDefaultSize, 0 );
-	m_toolBar2->AddControl( ManualSet );
-	m_toolBar2->Realize();
-
-	bSizer5->Add( m_toolBar2, 0, wxEXPAND, 5 );
-
-	m_grid1 = new wxGrid( this, wxID_ANY, wxDefaultPosition, wxDefaultSize, 0 );
+	m_grid = new wxGrid( this, wxID_ANY, wxDefaultPosition, wxDefaultSize, 0 );
 
 	// Grid
-	m_grid1->CreateGrid( 5, 5 );
-	m_grid1->EnableEditing( true );
-	m_grid1->EnableGridLines( true );
-	m_grid1->EnableDragGridSize( false );
-	m_grid1->SetMargins( 0, 0 );
+	m_grid->CreateGrid( 5, 5 );
+	m_grid->EnableEditing( true );
+	m_grid->EnableGridLines( true );
+	m_grid->EnableDragGridSize( false );
+	m_grid->SetMargins( 0, 0 );
 
 	// Columns
-	m_grid1->EnableDragColMove( false );
-	m_grid1->EnableDragColSize( true );
-	m_grid1->SetColLabelAlignment( wxALIGN_CENTER, wxALIGN_CENTER );
+	m_grid->EnableDragColMove( false );
+	m_grid->EnableDragColSize( true );
+	m_grid->SetColLabelAlignment( wxALIGN_CENTER, wxALIGN_CENTER );
 
 	// Rows
-	m_grid1->EnableDragRowSize( true );
-	m_grid1->SetRowLabelAlignment( wxALIGN_CENTER, wxALIGN_CENTER );
+	m_grid->EnableDragRowSize( true );
+	m_grid->SetRowLabelAlignment( wxALIGN_CENTER, wxALIGN_CENTER );
 
 	// Label Appearance
 
 	// Cell Defaults
-	m_grid1->SetDefaultCellAlignment( wxALIGN_LEFT, wxALIGN_TOP );
-	bSizer5->Add( m_grid1, 1, wxALL|wxEXPAND, 5 );
+	m_grid->SetDefaultCellAlignment( wxALIGN_LEFT, wxALIGN_TOP );
+	bSizer->Add( m_grid, 1, wxALL|wxEXPAND, 5 );
 
 
-	this->SetSizer( bSizer5 );
+	this->SetSizer( bSizer );
 	this->Layout();
 }
 
-GridPage::~GridPage()
+GridWnd::~GridWnd()
 {
 }
 
-SetPage::SetPage( wxWindow* parent, wxWindowID id, const wxPoint& pos, const wxSize& size, long style, const wxString& name ) : wxPanel( parent, id, pos, size, style, name )
+MyPanel10::MyPanel10( wxWindow* parent, wxWindowID id, const wxPoint& pos, const wxSize& size, long style, const wxString& name ) : wxPanel( parent, id, pos, size, style, name )
 {
-	wxBoxSizer* bSizer5;
-	bSizer5 = new wxBoxSizer( wxVERTICAL );
+	wxBoxSizer* bSizer;
+	bSizer = new wxBoxSizer( wxVERTICAL );
 
-	m_toolBar2 = new wxToolBar( this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTB_HORIZONTAL );
-	wxString UpdateModeChoices[] = { wxT("手动刷新"), wxT("周期刷新") };
-	int UpdateModeNChoices = sizeof( UpdateModeChoices ) / sizeof( wxString );
-	UpdateMode = new wxChoice( m_toolBar2, wxID_ANY, wxDefaultPosition, wxDefaultSize, UpdateModeNChoices, UpdateModeChoices, 0 );
-	UpdateMode->SetSelection( 0 );
-	m_toolBar2->AddControl( UpdateMode );
-	PeriodMs = new wxStaticText( m_toolBar2, wxID_ANY, wxT("刷新周期(Ms):"), wxDefaultPosition, wxDefaultSize, 0 );
-	PeriodMs->Wrap( -1 );
-	m_toolBar2->AddControl( PeriodMs );
-	Period = new wxSpinCtrl( m_toolBar2, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT, 100, 100000000, 1000 );
-	m_toolBar2->AddControl( Period );
-	UpdatePara = new wxStaticText( m_toolBar2, wxID_ANY, wxT("参数:"), wxDefaultPosition, wxDefaultSize, 0 );
-	UpdatePara->Wrap( -1 );
-	m_toolBar2->AddControl( UpdatePara );
-	m_spinCtrl3 = new wxSpinCtrl( m_toolBar2, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, -2147483648, 2147483647, 0 );
-	m_toolBar2->AddControl( m_spinCtrl3 );
-	ManualUpdate = new wxButton( m_toolBar2, wxID_ANY, wxT("刷新"), wxDefaultPosition, wxDefaultSize, 0 );
-	m_toolBar2->AddControl( ManualUpdate );
-	ManualSet = new wxButton( m_toolBar2, wxID_ANY, wxT("设置"), wxDefaultPosition, wxDefaultSize, 0 );
-	m_toolBar2->AddControl( ManualSet );
-	m_toolBar2->Realize();
-
-	bSizer5->Add( m_toolBar2, 0, wxEXPAND, 5 );
+	m_dataViewListCtrl000 = new wxDataViewListCtrl( this, wxID_ANY, wxDefaultPosition, wxDefaultSize, 0 );
+	bSizer->Add( m_dataViewListCtrl000, 1, wxALL|wxEXPAND, 5 );
 
 
-	this->SetSizer( bSizer5 );
+	this->SetSizer( bSizer );
 	this->Layout();
 }
 
-SetPage::~SetPage()
+MyPanel10::~MyPanel10()
+{
+}
+
+CascadeWnd::CascadeWnd( wxWindow* parent, wxWindowID id, const wxPoint& pos, const wxSize& size, long style, const wxString& name ) : wxPanel( parent, id, pos, size, style, name )
+{
+	wxBoxSizer* bSizer21;
+	bSizer21 = new wxBoxSizer( wxVERTICAL );
+
+	ListPage = new wxListbook( this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxLB_DEFAULT );
+	m_panel000 = new wxPanel( ListPage, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
+	wxBoxSizer* pb000;
+	pb000 = new wxBoxSizer( wxVERTICAL );
+
+
+	m_panel000->SetSizer( pb000 );
+	m_panel000->Layout();
+	pb000->Fit( m_panel000 );
+	ListPage->AddPage( m_panel000, wxT("a page"), false );
+	#ifdef __WXGTK__ // Small icon style not supported in GTK
+	wxListView* ListPageListView = ListPage->GetListView();
+	long ListPageFlags = ListPageListView->GetWindowStyleFlag();
+	if( ListPageFlags & wxLC_SMALL_ICON )
+	{
+		ListPageFlags = ( ListPageFlags & ~wxLC_SMALL_ICON ) | wxLC_ICON;
+	}
+	ListPageListView->SetWindowStyleFlag( ListPageFlags );
+	#endif
+
+	bSizer21->Add( ListPage, 1, wxEXPAND | wxALL, 5 );
+
+
+	this->SetSizer( bSizer21 );
+	this->Layout();
+}
+
+CascadeWnd::~CascadeWnd()
 {
 }
 

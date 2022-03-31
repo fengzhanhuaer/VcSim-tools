@@ -41,6 +41,9 @@ public:
 	struct IedStatus
 	{
 		SalDateStamp stamp;
+		wxString iedName;
+		wxString iedType;
+		wxString iedDiviceId;
 	};
 public:
 	void ReConnect();
@@ -54,14 +57,18 @@ public:
 	virtual void LogOnWnd(InstLogOnEvent& event);
 	virtual void ShowAbout(wxCommandEvent& event);
 	int32 RecMsg(SalCmmMsgHeader& msg);
+	int32 RecMsg(uint32 MsgType, int32 WaitTime, SalCmmMsgHeader& msg);
 	int32 SendMsg(SalCmmMsgHeader& msg);
 	int32 SendMsg(SalCmmMsgHeader& msg, uint32 DataLen);
-	int32 SendMsg(IedToolsMsgHeader& msg);
+	int32 SendMsg(SalTransHeader& msg);
 	void UpdateTitle();
 	void UpdateTime();
+	void ShowDiglog(SalTransFrame60kB* msg);
+	void SendHeartBeat();
 protected:
 	int32 Check();
 	int32 Work();
+	int32 Unpack(SalCmmMsgHeader& msg);
 	int32 CloseSock();
 	InstMainWnd();
 	~InstMainWnd();
@@ -98,6 +105,12 @@ public:
 		{
 			LogBox->Hide((size_t)1);
 		}
+		if (Name.StrLen())
+		{
+			nametext->SetValue(Name.Str());
+			nametext->SetEditable(0);
+		}
+		isOk = 0;
 	}
 	virtual void Enter(wxCommandEvent& event)
 	{
@@ -106,12 +119,15 @@ public:
 		Name = nametext->GetValue();
 		Pw = pwtext->GetValue();
 		Close(1);
+		isOk = 1;
 	}
 	virtual void Cancel(wxCommandEvent& event)
 	{
 		event.Skip(0);
 		Close(1);
+		isOk = 0;
 	}
+	bool8 isOk;
 	bool8 isCheckId;
 	bool8 isCheckAccount;
 	SalString& Id;

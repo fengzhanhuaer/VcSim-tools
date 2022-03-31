@@ -84,7 +84,7 @@ int32 InstMainWnd::OneLoop()
 	}
 	case E_AskIniInfo:
 	{
-		IedToolMsgCtrl ctrl;
+		SalTransFrame5kB ctrl;
 		ctrl.SetMsgIniInfo(E_ITMT_AskClientInfo, 0);
 		SendMsg(ctrl.Header());
 		taskStep = E_Work;
@@ -187,10 +187,13 @@ void InstMainWnd::LogOnWnd(InstLogOnEvent& event)
 {
 	if (needLog)
 	{
+		needLog = 0;
+		if ((event.isCheckId || event.isCheckAccount) == 0)
+		{
+			return;
+		}
 		InstLogOnWnd* w = new InstLogOnWnd(this, event.isCheckId, event.isCheckAccount, event.Id, event.Name, event.Pw);
 		w->ShowModal();
-		needLog = 0;
-
 		while (LogStatus() == DbgClient::E_CheckPw)
 		{
 			Sleep(100);
@@ -233,7 +236,7 @@ void InstMainWnd::ShowAbout(wxCommandEvent& event)
 
 int32 InstMainWnd::RecMsg(SalCmmMsgHeader& msg)
 {
-	if (recvSem.Wait(200) < 0)
+	if (recvSem.Wait(1000) < 0)
 	{
 		return 0;
 	}
@@ -305,13 +308,38 @@ int32 InstMainWnd::RecMsg(SalCmmMsgHeader& msg)
 	return 0;
 }
 
+int32 InstMainWnd::RecMsg(uint32 MsgType, int32 WaitTime, SalCmmMsgHeader& Msg)
+{
+	if (gmsock.IsLinkOk() == 0)
+	{
+		return -1;
+	}
+	MsTimer timer;
+	timer.UpCnt(WaitTime);
+	timer.Enable(1);
+	SalTransHeader* msg = (SalTransHeader*)&Msg;
+	while (!timer.Status())
+	{
+		if (RecMsg(Msg) <= 0)
+		{
+			MsSleep(200);
+			SendHeartBeat();
+		}
+		else if (msg->type == MsgType)
+		{
+			return 0;
+		}
+	}
+	return -1;
+}
+
 int32 InstMainWnd::SendMsg(SalCmmMsgHeader& msg)
 {
 	if (gmsock.IsLinkOk() == 0)
 	{
 		return 0;
 	}
-	if (sendSem.Wait(200) < 0)
+	if (sendSem.Wait(1000) < 0)
 	{
 		return 0;
 	}
@@ -339,7 +367,7 @@ int32 InstMainWnd::SendMsg(SalCmmMsgHeader& msg, uint32 DataLen)
 	return SendMsg(msg);
 }
 
-int32 InstMainWnd::SendMsg(IedToolsMsgHeader& msg)
+int32 InstMainWnd::SendMsg(SalTransHeader& msg)
 {
 	msg.salHeader.len = (uint16)msg.dataLen + sizeof(SalTransHeader);
 	return SendMsg(msg.salHeader);
@@ -347,7 +375,13 @@ int32 InstMainWnd::SendMsg(IedToolsMsgHeader& msg)
 
 void InstMainWnd::UpdateTitle()
 {
-
+	wxString str = "IedTools ";
+	str += iedStauts.iedName;
+	str += " - ";
+	str += iedStauts.iedType;
+	str += " - ";
+	str += iedStauts.iedDiviceId;
+	SetTitle(str);
 }
 
 void InstMainWnd::UpdateTime()
@@ -357,6 +391,59 @@ void InstMainWnd::UpdateTime()
 	str << " ";
 	str.FormatHex((uint8)iedStauts.stamp.q.q);
 	m_statusBar1->SetStatusText(str.Str(), 1);
+}
+
+void InstMainWnd::ShowDiglog(SalTransFrame60kB* msg)
+{
+	uint32 type;
+	msg->Read(type);
+	if (type == IedToolsDialog::E_AskIdPw)
+	{
+		char title[40];
+		char name[40];
+		msg->Read(title, sizeof(title));
+		msg->Read(name, sizeof(name));
+		String100B Id;
+		String100B Name;
+		String100B Pw;
+		InstLogOnWnd* wnd = new InstLogOnWnd(this, 0, 1, Id, Name, Pw);
+		wnd->SetTitle(title);
+		wnd->ShowModal();
+		SalTransFrame5kB sendmsg;
+		sendmsg.SetMsgIniInfo(E_ITMT_ShowDialog, 0);
+		uint32 u32 = IedToolsDialog::E_AskIdPw;
+		sendmsg.Write(&u32, sizeof(u32));
+		if (wnd->isOk)
+		{
+			int32 i32 = 0;
+			sendmsg.Write(&i32, sizeof(i32));
+			char buf[40];
+			StrNCpy(buf, Name.Str(), sizeof(buf));
+			DecryptData(buf, sizeof(buf), 156);
+			sendmsg.Write(&buf, sizeof(buf));
+			StrNCpy(buf, Pw.Str(), sizeof(buf));
+			DecryptData(buf, sizeof(buf), 156);
+			sendmsg.Write(&buf, sizeof(buf));
+		}
+		else
+		{
+			int32 i32 = -1;
+			sendmsg.Write(&i32, sizeof(i32));
+		}
+		SendMsg(sendmsg.Header());
+	}
+	delete msg;
+}
+
+void InstMainWnd::SendHeartBeat()
+{
+	SalDateStamp s;
+	s.Now();
+	IedToolHeartBeatMsg msg;
+	msg.data.stamp = s;
+	msg.header.SetHeader(E_ITMT_HeartBeat, 0, sizeof(msg.data));
+	SendMsg(msg.header.salHeader);
+	heartbeatTimer.Restart();
 }
 
 int32 InstMainWnd::Check()
@@ -371,7 +458,7 @@ int32 InstMainWnd::Check()
 	}
 	else if (gmsock.IsLinkOk())
 	{
-		checkTimer.UpCnt(5000);
+		checkTimer.UpCnt(10000);
 		checkTimer.Enable(1);
 	}
 	else
@@ -381,7 +468,7 @@ int32 InstMainWnd::Check()
 	}
 	if (checkTimer.Status())
 	{
-		IedToolMsgCtrl ctrl;
+		SalTransFrame5kB ctrl;
 		ctrl.SetMsgIniInfo(E_ITMT_SockClose, 0);
 		SendMsg(ctrl.Header());
 		MsSleep(100);
@@ -417,13 +504,19 @@ int32 InstMainWnd::Check()
 
 int32 InstMainWnd::Work()
 {
-	IedToolsMsg60kb imsg;
-	if (RecMsg(imsg.header) <= 0)
+	SalTransFrame5kB imsg;
+	if (RecMsg(imsg.Header().salHeader) <= 0)
 	{
 		MsSleep(10);
 		return 0;
 	}
-	IedToolsMsgHeader* msg = (IedToolsMsgHeader*)&imsg;
+	Unpack(imsg.Header().salHeader);
+	return 0;
+}
+
+int32 InstMainWnd::Unpack(SalCmmMsgHeader& Msg)
+{
+	SalTransHeader* msg = (SalTransHeader*)&Msg;
 	uint16 type = msg->type;
 	switch (type)
 	{
@@ -443,10 +536,30 @@ int32 InstMainWnd::Work()
 	}
 	case E_ITMT_AskClientInfoAck:
 	{
-		IedToolsMsg* m = (IedToolsMsg*)msg;
+		SalTransFrame* m = (SalTransFrame*)msg;
 		TransString ts;
+		String100B str;
 		ts.SetBuf((const char*)m->data);
+		ts.GetLine(str, ',');
+		iedStauts.iedName = str.Str();
+		str.Clear();
+		ts.GetLine(str, ',');
+		iedStauts.iedType = str.Str();
+		str.Clear();
+		ts.GetLine(str, ',');
+		iedStauts.iedDiviceId = str.Str();
+		str.Clear();
 		CallAfter(&InstMainWnd::UpdateTitle);
+		SalTransFrame5kB ctrl;
+		ctrl.SetMsgIniInfo(E_ITMT_AskRootWnd, 0);
+		SendMsg(ctrl.Header());
+		break;
+	}
+	case E_ITMT_ShowDialog:
+	{
+		SalTransFrame60kB* m = new SalTransFrame60kB;
+		MemCpy(m, msg, msg->dataLen);
+		CallAfter(&InstMainWnd::ShowDiglog, m);
 		break;
 	}
 	default:

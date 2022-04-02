@@ -1,18 +1,23 @@
 #include"Main.h"
 
 wxDEFINE_EVENT(Inst_LogOn_Event, InstLogOnEvent);
+wxDEFINE_EVENT(Inst_Msg_Event, InstMsgEvent);
 
 InstMainWnd::InstMainWnd()
 	:MainWnd(0)
 {
 	cfg = &dbgcfg;
 	this->Connect(Inst_LogOn_Event, wxTransLogOnEventHandler(InstMainWnd::LogOnWnd));
+	this->Connect(Inst_Msg_Event, wxTransMsgEventHandler(InstMainWnd::ShowDiglog));
+	rootBook = new InstCascadeWnd(this, this);
+	RootBox->Add(rootBook, 1, wxEXPAND | wxALL, 5);
 }
 
 InstMainWnd::~InstMainWnd()
 {
 	SocketEnvClearUp();
 	this->Disconnect(Inst_LogOn_Event, wxTransLogOnEventHandler(InstMainWnd::LogOnWnd));
+	this->Disconnect(Inst_Msg_Event, wxTransMsgEventHandler(InstMainWnd::ShowDiglog));
 }
 
 void InstMainWnd::ReConnect()
@@ -39,7 +44,7 @@ int32 InstMainWnd::PowerUpIni(int32 Type)
 	wxString tempString('M', 1);
 	wxCoord width, height;
 	dc.GetTextExtent(tempString, &width, &height);
-	int fildw[5] = { width * 10,width * 20, };
+	int fildw[5] = { width * 5,width * 18,width * 5, };
 	m_statusBar1->SetStatusWidths(WXSIZEOF(fildw), fildw);
 	Start();
 	return 0;
@@ -92,8 +97,11 @@ int32 InstMainWnd::OneLoop()
 	}
 	case E_Work:
 	{
-		Work();
-		taskStep = E_Check;
+		if (Work() == 1)
+		{
+			taskStep = E_Check;
+			MsSleep(50);
+		}
 		break;
 	}
 	case E_Check:
@@ -106,6 +114,7 @@ int32 InstMainWnd::OneLoop()
 		{
 			taskStep = E_WaitConnect;
 		}
+		MsSleep(50);
 		break;
 	}
 	default:
@@ -176,24 +185,24 @@ void InstMainWnd::OnWndIdle(wxIdleEvent& event)
 	}
 	else if (Task::TaskStep() == DbgClient::E_Check)
 	{
-		str << "自检···";
+		str << "已连接";
 	}
 	m_statusBar1->SetStatusText(str, 0);
-
-
 }
 
 void InstMainWnd::LogOnWnd(InstLogOnEvent& event)
 {
 	if (needLog)
 	{
-		needLog = 0;
 		if ((event.isCheckId || event.isCheckAccount) == 0)
 		{
+			needLog = 0;
 			return;
 		}
+		wxWindowDisabler disableAll;
 		InstLogOnWnd* w = new InstLogOnWnd(this, event.isCheckId, event.isCheckAccount, event.Id, event.Name, event.Pw);
 		w->ShowModal();
+		needLog = 0;
 		while (LogStatus() == DbgClient::E_CheckPw)
 		{
 			Sleep(100);
@@ -232,6 +241,7 @@ void InstMainWnd::ShowAbout(wxCommandEvent& event)
 	wxMessageDialog dig(this, "iESLab, All Rights Reserved.\n冯占华\n V0.5.0\n" __DATE__" " __TIME__, "关于", wxOK);
 	dig.ShowModal();
 	event.Skip(0);
+	needLog = 0;
 }
 
 int32 InstMainWnd::RecMsg(SalCmmMsgHeader& msg)
@@ -242,8 +252,6 @@ int32 InstMainWnd::RecMsg(SalCmmMsgHeader& msg)
 	}
 	try
 	{
-
-
 		SalCmmMsgHeader header;
 		int cnt = 0;
 		while (gmsock.Recv(&header, sizeof(header), 0) == sizeof(header))
@@ -393,11 +401,12 @@ void InstMainWnd::UpdateTime()
 	m_statusBar1->SetStatusText(str.Str(), 1);
 }
 
-void InstMainWnd::ShowDiglog(SalTransFrame60kB* msg)
+void InstMainWnd::ShowDiglog(InstMsgEvent& event)
 {
+	SalTransFrame60kB* msg = event.msg;
 	uint32 type;
 	msg->Read(type);
-	if (type == IedToolsDialog::E_AskIdPw)
+	if (type == IedToolsDialog::E_AskAccountPw)
 	{
 		char title[40];
 		char name[40];
@@ -405,24 +414,25 @@ void InstMainWnd::ShowDiglog(SalTransFrame60kB* msg)
 		msg->Read(name, sizeof(name));
 		String100B Id;
 		String100B Name;
+		Name = name;
 		String100B Pw;
-		InstLogOnWnd* wnd = new InstLogOnWnd(this, 0, 1, Id, Name, Pw);
-		wnd->SetTitle(title);
-		wnd->ShowModal();
+		InstLogOnWnd wnd(this, 0, 1, Id, Name, Pw);
+		wnd.SetTitle(title);
+		wnd.ShowModal();
 		SalTransFrame5kB sendmsg;
 		sendmsg.SetMsgIniInfo(E_ITMT_ShowDialog, 0);
-		uint32 u32 = IedToolsDialog::E_AskIdPw;
+		uint32 u32 = IedToolsDialog::E_AskAccountPw;
 		sendmsg.Write(&u32, sizeof(u32));
-		if (wnd->isOk)
+		if (wnd.isOk)
 		{
 			int32 i32 = 0;
 			sendmsg.Write(&i32, sizeof(i32));
 			char buf[40];
 			StrNCpy(buf, Name.Str(), sizeof(buf));
-			DecryptData(buf, sizeof(buf), 156);
+			EncryptData(buf, sizeof(buf), 156);
 			sendmsg.Write(&buf, sizeof(buf));
 			StrNCpy(buf, Pw.Str(), sizeof(buf));
-			DecryptData(buf, sizeof(buf), 156);
+			EncryptData(buf, sizeof(buf), 56);
 			sendmsg.Write(&buf, sizeof(buf));
 		}
 		else
@@ -433,6 +443,96 @@ void InstMainWnd::ShowDiglog(SalTransFrame60kB* msg)
 		SendMsg(sendmsg.Header());
 	}
 	delete msg;
+}
+
+void InstMainWnd::AddChildWnd(SalTransFrame256B* msg)
+{
+	uint32 parentId, Id;
+	msg->Read(parentId);
+	msg->Read(Id);
+	char name[40];
+	msg->Read(name, sizeof(name));
+	if (parentId == 0)
+	{
+		rootBook->ListPage->AddPage(new InstWhiteBoard(rootBook->ListPage, this, msg), name);
+		if (Id == -1)
+		{
+			rootBook->ListPage->SetSelection(rootBook->ListPage->GetPageCount() - 1);
+		}
+	}
+	else
+	{
+		InstWhiteBoard* Page = SearchBoard(rootBook, parentId);
+		if (Page)
+		{
+			if (!Page->rootBook)
+			{
+				Page->rootBook = new InstCascadeWnd(Page, this);
+				Page->bSizer->Add(Page->rootBook, 1, wxEXPAND, 5);
+			}
+			Page->rootBook->ListPage->AddPage(new InstWhiteBoard(Page->rootBook->ListPage, this, msg), name);
+			if (Id == -1)
+			{
+				Page->rootBook->ListPage->SetSelection(Page->rootBook->ListPage->GetPageCount() - 1);
+			}
+		}
+	}
+	delete msg;
+}
+
+void InstMainWnd::EnterWnd(SalTransFrame256B* msg)
+{
+	uint32 Id, res;
+	msg->Read(Id);
+	msg->Read(res);
+	if (res)
+	{
+		InstWhiteBoard* Page = SearchBoard(rootBook, Id);
+		if (Page)
+		{
+			if (Page->parentWndId == 0)
+			{
+				rootBook->ListPage->SetSelection(rootBook->ListPage->GetPageCount() - 1);
+			}
+			else
+			{
+				Page = SearchBoard(rootBook, Page->parentWndId);
+				if (Page)
+				{
+					Page->rootBook->ListPage->SetSelection(Page->rootBook->ListPage->GetPageCount() - 1);
+				}
+			}
+		}
+	}
+}
+
+InstWhiteBoard* InstMainWnd::SearchBoard(InstCascadeWnd* RootBook, uint32 Id)
+{
+	uint32 total = RootBook->ListPage->GetPageCount();
+	for (uint32 i = 0; i < total; i++)
+	{
+		InstWhiteBoard* Page = (InstWhiteBoard*)(RootBook->ListPage->GetPage(i));
+		if (Page->wndId < Id)
+		{
+			if (Page->rootBook)
+			{
+				InstWhiteBoard* Pa = SearchBoard(Page->rootBook, Id);
+				if (Pa)
+				{
+					return Pa;
+				}
+			}
+		}
+		else if (Page->wndId == Id)
+		{
+			return Page;
+		}
+		else
+		{
+			return 0;
+		}
+	}
+	return 0;
 }
 
 void InstMainWnd::SendHeartBeat()
@@ -507,8 +607,7 @@ int32 InstMainWnd::Work()
 	SalTransFrame5kB imsg;
 	if (RecMsg(imsg.Header().salHeader) <= 0)
 	{
-		MsSleep(10);
-		return 0;
+		return 1;
 	}
 	Unpack(imsg.Header().salHeader);
 	return 0;
@@ -516,14 +615,14 @@ int32 InstMainWnd::Work()
 
 int32 InstMainWnd::Unpack(SalCmmMsgHeader& Msg)
 {
-	SalTransHeader* msg = (SalTransHeader*)&Msg;
-	uint16 type = msg->type;
+	SalTransFrame* msg = (SalTransFrame*)&Msg;
+	uint16 type = msg->Header.type;
 	switch (type)
 	{
 	case E_ITMT_HeartBeat:
 	{
 		IedToolHeartBeatMsg m;
-		MemCpy(&m, msg, msg->salHeader.len);
+		MemCpy(&m, msg, msg->Header.salHeader.len);
 		iedStauts.stamp = m.data.stamp;
 		CallAfter(&InstMainWnd::UpdateTime);
 		break;
@@ -536,6 +635,7 @@ int32 InstMainWnd::Unpack(SalCmmMsgHeader& Msg)
 	}
 	case E_ITMT_AskClientInfoAck:
 	{
+		rootBook->ListPage->DeleteAllPages();
 		SalTransFrame* m = (SalTransFrame*)msg;
 		TransString ts;
 		String100B str;
@@ -551,15 +651,33 @@ int32 InstMainWnd::Unpack(SalCmmMsgHeader& Msg)
 		str.Clear();
 		CallAfter(&InstMainWnd::UpdateTitle);
 		SalTransFrame5kB ctrl;
-		ctrl.SetMsgIniInfo(E_ITMT_AskRootWnd, 0);
+		uint32 u32 = 0;
+		ctrl.Write(u32);
+		ctrl.SetMsgIniInfo(E_ITMT_AskWnd, 0);
 		SendMsg(ctrl.Header());
 		break;
 	}
 	case E_ITMT_ShowDialog:
 	{
 		SalTransFrame60kB* m = new SalTransFrame60kB;
-		MemCpy(m, msg, msg->dataLen);
-		CallAfter(&InstMainWnd::ShowDiglog, m);
+		m->CopyCtx(msg->Header.salHeader);
+		InstMsgEvent* event = new InstMsgEvent(Inst_Msg_Event, wxID_ANY, this, m);
+		event->SetEventObject(this);
+		QueueEvent(event);
+		break;
+	}
+	case E_ITMT_AskWndAck:
+	{
+		SalTransFrame256B* m = new SalTransFrame256B;
+		m->Write(msg->data, msg->Header.dataLen);
+		CallAfter(&InstMainWnd::AddChildWnd, m);
+		break;
+	}
+	case E_ITMT_EnterWndAck:
+	{
+		SalTransFrame256B* m = new SalTransFrame256B;
+		m->Write(msg->data, msg->Header.dataLen);
+		CallAfter(&InstMainWnd::EnterWnd, m);
 		break;
 	}
 	default:
@@ -575,6 +693,7 @@ int32 InstMainWnd::CloseSock()
 	gmsock.GetRemote(str);
 	DbgToolsServer::Instance().SetClientClose(DbgToolsServer::E_IedTools, str.Str());
 	checkTimer.Enable(0);
+	rootBook->ListPage->DeleteAllPages();
 	return 0;
 }
 
@@ -598,5 +717,54 @@ int32 InstDbgCfg::PowerUpIni(int32 Para)
 		SaveAll();
 	}
 	return 0;
+}
+
+InstWhiteBoard::InstWhiteBoard(wxWindow* parent, class InstMainWnd* iInstMainWnd, SalTransFrame256B* Ctrl)
+	:WhiteBoard(parent)
+{
+	SalTransFrame256B msg;
+	msg.CopyCtx(Ctrl->Header().salHeader);
+	msg.Read(parentWndId);
+	msg.Read(wndId);
+	char name[40];
+	msg.Read(name, sizeof(name));
+	rootBook = 0;
+	instMainWnd = iInstMainWnd;
+}
+
+InstCascadeWnd::InstCascadeWnd(wxWindow* parent, class  InstMainWnd* iInstMainWnd)
+	:CascadeWnd(parent)
+{
+	instMainWnd = iInstMainWnd;
+	wndId = 0;
+	parentWndId = 0;
+}
+
+void InstCascadeWnd::PageChanged(wxListbookEvent& event)
+{
+	uint32 last = event.GetOldSelection();
+	InstWhiteBoard* Page = (InstWhiteBoard*)(ListPage->GetPage(last));
+	if (Page && Page->rootBook && Page->rootBook->ListPage->GetPageCount())
+	{
+		Page->rootBook->ListPage->DeleteAllPages();
+	}
+	uint32 index = event.GetSelection();
+	Page = (InstWhiteBoard*)(ListPage->GetPage(index));
+	SalTransFrame256B m;
+	m.SetMsgIniInfo(E_ITMT_EnterWnd, 0);
+	uint32 u32 = Page->wndId;
+	if (u32 == -1)
+	{
+		return;
+	}
+	m.Write(u32);
+	instMainWnd->SendMsg(m.Header());
+	event.Skip(1);
+}
+
+void InstCascadeWnd::PageChanging(wxListbookEvent& event)
+{
+
+	event.Skip(1);
 }
 

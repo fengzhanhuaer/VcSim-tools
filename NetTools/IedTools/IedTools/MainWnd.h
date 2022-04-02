@@ -67,7 +67,7 @@ class MainWnd : public wxFrame
 
 	public:
 
-		MainWnd( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("IedTools"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 1151,683 ), long style = wxDEFAULT_FRAME_STYLE|wxTAB_TRAVERSAL );
+		MainWnd( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("IedTools"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 1199,699 ), long style = wxDEFAULT_FRAME_STYLE|wxTAB_TRAVERSAL );
 
 		~MainWnd();
 
@@ -81,17 +81,21 @@ class TextWnd : public wxPanel
 	private:
 
 	protected:
-		wxSpinCtrlDouble* dPara1;
-		wxSpinCtrlDouble* dPara2;
-		wxSpinCtrlDouble* dPara3;
-		wxCheckBox* Check1;
-		wxCheckBox* Check2;
-		wxCheckBox* Check3;
-		wxButton* Button1;
-		wxButton* Button2;
-		wxButton* Button3;
-		wxChoice* updateMode;
-		wxButton* UpdateButton;
+		wxStaticBoxSizer* panelCtrl1;
+		wxStaticBoxSizer* sbdPara11;
+		wxSpinCtrlDouble* dPara11;
+		wxStaticBoxSizer* sbdPara21;
+		wxSpinCtrlDouble* dPara21;
+		wxStaticBoxSizer* sbdPara31;
+		wxSpinCtrlDouble* dPara31;
+		wxCheckBox* Check11;
+		wxCheckBox* Check21;
+		wxCheckBox* Check31;
+		wxButton* Button11;
+		wxButton* Button21;
+		wxButton* Button31;
+		wxChoice* updateMode1;
+		wxButton* UpdateButton1;
 		wxRichTextCtrl* text;
 
 	public:
@@ -121,9 +125,9 @@ class GridWnd : public wxPanel
 };
 
 ///////////////////////////////////////////////////////////////////////////////
-/// Class MyPanel10
+/// Class DataView
 ///////////////////////////////////////////////////////////////////////////////
-class MyPanel10 : public wxPanel
+class DataView : public wxPanel
 {
 	private:
 
@@ -132,9 +136,27 @@ class MyPanel10 : public wxPanel
 
 	public:
 
-		MyPanel10( wxWindow* parent, wxWindowID id = wxID_ANY, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 500,300 ), long style = wxTAB_TRAVERSAL, const wxString& name = wxEmptyString );
+		DataView( wxWindow* parent, wxWindowID id = wxID_ANY, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 500,300 ), long style = wxTAB_TRAVERSAL, const wxString& name = wxEmptyString );
 
-		~MyPanel10();
+		~DataView();
+
+};
+
+///////////////////////////////////////////////////////////////////////////////
+/// Class WhiteBoard
+///////////////////////////////////////////////////////////////////////////////
+class WhiteBoard : public wxPanel
+{
+	private:
+
+	protected:
+
+	public:
+		wxBoxSizer* bSizer;
+
+		WhiteBoard( wxWindow* parent, wxWindowID id = wxID_ANY, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 957,668 ), long style = wxTAB_TRAVERSAL, const wxString& name = wxEmptyString );
+
+		~WhiteBoard();
 
 };
 
@@ -146,10 +168,14 @@ class CascadeWnd : public wxPanel
 	private:
 
 	protected:
-		wxListbook* ListPage;
-		wxPanel* m_panel000;
+
+		// Virtual event handlers, override them in your derived class
+		virtual void PageChanged( wxListbookEvent& event ) { event.Skip(); }
+		virtual void PageChanging( wxListbookEvent& event ) { event.Skip(); }
+
 
 	public:
+		wxListbook* ListPage;
 
 		CascadeWnd( wxWindow* parent, wxWindowID id = wxID_ANY, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 834,595 ), long style = wxTAB_TRAVERSAL, const wxString& name = wxEmptyString );
 

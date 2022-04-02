@@ -61,93 +61,95 @@ MainWnd::~MainWnd()
 
 TextWnd::TextWnd( wxWindow* parent, wxWindowID id, const wxPoint& pos, const wxSize& size, long style, const wxString& name ) : wxPanel( parent, id, pos, size, style, name )
 {
+	wxBoxSizer* bSizer1;
+	bSizer1 = new wxBoxSizer( wxVERTICAL );
+
 	wxBoxSizer* bSizer;
 	bSizer = new wxBoxSizer( wxVERTICAL );
 
-	wxStaticBoxSizer* panelCtrl;
-	panelCtrl = new wxStaticBoxSizer( new wxStaticBox( this, wxID_ANY, wxT("label") ), wxHORIZONTAL );
+	panelCtrl1 = new wxStaticBoxSizer( new wxStaticBox( this, wxID_ANY, wxT("label") ), wxHORIZONTAL );
 
-	wxStaticBoxSizer* sbdPara1;
-	sbdPara1 = new wxStaticBoxSizer( new wxStaticBox( panelCtrl->GetStaticBox(), wxID_ANY, wxT("label") ), wxVERTICAL );
+	sbdPara11 = new wxStaticBoxSizer( new wxStaticBox( panelCtrl1->GetStaticBox(), wxID_ANY, wxT("label") ), wxVERTICAL );
 
-	dPara1 = new wxSpinCtrlDouble( sbdPara1->GetStaticBox(), wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 0, 100, 0, 1 );
-	dPara1->SetDigits( 0 );
-	dPara1->Enable( false );
-
-	sbdPara1->Add( dPara1, 1, wxALL|wxEXPAND, 5 );
+	dPara11 = new wxSpinCtrlDouble( sbdPara11->GetStaticBox(), wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 0, 100, 0, 1 );
+	dPara11->SetDigits( 0 );
+	sbdPara11->Add( dPara11, 1, wxALL|wxEXPAND, 5 );
 
 
-	panelCtrl->Add( sbdPara1, 1, wxEXPAND, 5 );
+	panelCtrl1->Add( sbdPara11, 1, wxEXPAND, 5 );
 
-	wxStaticBoxSizer* sbdPara2;
-	sbdPara2 = new wxStaticBoxSizer( new wxStaticBox( panelCtrl->GetStaticBox(), wxID_ANY, wxT("label") ), wxVERTICAL );
+	sbdPara21 = new wxStaticBoxSizer( new wxStaticBox( panelCtrl1->GetStaticBox(), wxID_ANY, wxT("label") ), wxVERTICAL );
 
-	dPara2 = new wxSpinCtrlDouble( sbdPara2->GetStaticBox(), wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 0, 100, 0, 1 );
-	dPara2->SetDigits( 0 );
-	sbdPara2->Add( dPara2, 0, wxALL, 5 );
+	dPara21 = new wxSpinCtrlDouble( sbdPara21->GetStaticBox(), wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 0, 100, 0, 1 );
+	dPara21->SetDigits( 0 );
+	dPara21->Enable( false );
 
-
-	panelCtrl->Add( sbdPara2, 1, wxEXPAND, 5 );
-
-	wxStaticBoxSizer* sbdPara3;
-	sbdPara3 = new wxStaticBoxSizer( new wxStaticBox( panelCtrl->GetStaticBox(), wxID_ANY, wxT("label") ), wxVERTICAL );
-
-	dPara3 = new wxSpinCtrlDouble( sbdPara3->GetStaticBox(), wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 0, 100, 0, 1 );
-	dPara3->SetDigits( 0 );
-	dPara3->Enable( false );
-
-	sbdPara3->Add( dPara3, 1, wxALL|wxEXPAND, 5 );
+	sbdPara21->Add( dPara21, 1, wxALL|wxEXPAND, 5 );
 
 
-	panelCtrl->Add( sbdPara3, 1, wxEXPAND, 5 );
+	panelCtrl1->Add( sbdPara21, 1, wxEXPAND, 5 );
 
-	Check1 = new wxCheckBox( panelCtrl->GetStaticBox(), wxID_ANY, wxT("Check Me!"), wxDefaultPosition, wxDefaultSize, 0 );
-	Check1->Enable( false );
+	sbdPara31 = new wxStaticBoxSizer( new wxStaticBox( panelCtrl1->GetStaticBox(), wxID_ANY, wxT("label") ), wxVERTICAL );
 
-	panelCtrl->Add( Check1, 1, wxALL|wxALIGN_CENTER_VERTICAL, 5 );
+	dPara31 = new wxSpinCtrlDouble( sbdPara31->GetStaticBox(), wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 0, 100, 0, 1 );
+	dPara31->SetDigits( 0 );
+	dPara31->Enable( false );
 
-	Check2 = new wxCheckBox( panelCtrl->GetStaticBox(), wxID_ANY, wxT("Check Me!"), wxDefaultPosition, wxDefaultSize, 0 );
-	Check2->Enable( false );
-
-	panelCtrl->Add( Check2, 1, wxALL|wxALIGN_CENTER_VERTICAL, 5 );
-
-	Check3 = new wxCheckBox( panelCtrl->GetStaticBox(), wxID_ANY, wxT("Check Me!"), wxDefaultPosition, wxDefaultSize, 0 );
-	Check3->Enable( false );
-
-	panelCtrl->Add( Check3, 1, wxALL|wxALIGN_CENTER_VERTICAL, 5 );
-
-	Button1 = new wxButton( panelCtrl->GetStaticBox(), wxID_ANY, wxT("MyButton"), wxDefaultPosition, wxDefaultSize, 0 );
-	Button1->Enable( false );
-
-	panelCtrl->Add( Button1, 1, wxALL|wxALIGN_CENTER_VERTICAL, 5 );
-
-	Button2 = new wxButton( panelCtrl->GetStaticBox(), wxID_ANY, wxT("MyButton"), wxDefaultPosition, wxDefaultSize, 0 );
-	Button2->Enable( false );
-
-	panelCtrl->Add( Button2, 1, wxALL|wxALIGN_CENTER_VERTICAL, 5 );
-
-	Button3 = new wxButton( panelCtrl->GetStaticBox(), wxID_ANY, wxT("MyButton"), wxDefaultPosition, wxDefaultSize, 0 );
-	Button3->Enable( false );
-
-	panelCtrl->Add( Button3, 1, wxALL|wxALIGN_CENTER_VERTICAL, 5 );
-
-	wxString updateModeChoices[] = { wxT("手动刷新"), wxT("自动刷新") };
-	int updateModeNChoices = sizeof( updateModeChoices ) / sizeof( wxString );
-	updateMode = new wxChoice( panelCtrl->GetStaticBox(), wxID_ANY, wxDefaultPosition, wxDefaultSize, updateModeNChoices, updateModeChoices, 0 );
-	updateMode->SetSelection( 0 );
-	panelCtrl->Add( updateMode, 0, wxALL|wxALIGN_CENTER_VERTICAL, 5 );
-
-	UpdateButton = new wxButton( panelCtrl->GetStaticBox(), wxID_ANY, wxT("刷新"), wxDefaultPosition, wxDefaultSize, 0 );
-	panelCtrl->Add( UpdateButton, 0, wxALL|wxALIGN_CENTER_VERTICAL, 5 );
+	sbdPara31->Add( dPara31, 1, wxALL|wxEXPAND, 5 );
 
 
-	bSizer->Add( panelCtrl, 0, wxEXPAND, 5 );
+	panelCtrl1->Add( sbdPara31, 1, wxEXPAND, 5 );
+
+	Check11 = new wxCheckBox( panelCtrl1->GetStaticBox(), wxID_ANY, wxT("Check Me!"), wxDefaultPosition, wxDefaultSize, 0 );
+	Check11->Hide();
+
+	panelCtrl1->Add( Check11, 1, wxALL|wxALIGN_CENTER_VERTICAL, 5 );
+
+	Check21 = new wxCheckBox( panelCtrl1->GetStaticBox(), wxID_ANY, wxT("Check Me!"), wxDefaultPosition, wxDefaultSize, 0 );
+	Check21->Hide();
+
+	panelCtrl1->Add( Check21, 1, wxALL|wxALIGN_CENTER_VERTICAL, 5 );
+
+	Check31 = new wxCheckBox( panelCtrl1->GetStaticBox(), wxID_ANY, wxT("Check Me!"), wxDefaultPosition, wxDefaultSize, 0 );
+	Check31->Hide();
+
+	panelCtrl1->Add( Check31, 1, wxALL|wxALIGN_CENTER_VERTICAL, 5 );
+
+	Button11 = new wxButton( panelCtrl1->GetStaticBox(), wxID_ANY, wxT("MyButton"), wxDefaultPosition, wxDefaultSize, 0 );
+	Button11->Hide();
+
+	panelCtrl1->Add( Button11, 1, wxALL|wxALIGN_CENTER_VERTICAL, 5 );
+
+	Button21 = new wxButton( panelCtrl1->GetStaticBox(), wxID_ANY, wxT("MyButton"), wxDefaultPosition, wxDefaultSize, 0 );
+	Button21->Hide();
+
+	panelCtrl1->Add( Button21, 1, wxALL|wxALIGN_CENTER_VERTICAL, 5 );
+
+	Button31 = new wxButton( panelCtrl1->GetStaticBox(), wxID_ANY, wxT("MyButton"), wxDefaultPosition, wxDefaultSize, 0 );
+	Button31->Hide();
+
+	panelCtrl1->Add( Button31, 1, wxALL|wxALIGN_CENTER_VERTICAL, 5 );
+
+	wxString updateMode1Choices[] = { wxT("手动刷新"), wxT("自动刷新") };
+	int updateMode1NChoices = sizeof( updateMode1Choices ) / sizeof( wxString );
+	updateMode1 = new wxChoice( panelCtrl1->GetStaticBox(), wxID_ANY, wxDefaultPosition, wxDefaultSize, updateMode1NChoices, updateMode1Choices, 0 );
+	updateMode1->SetSelection( 0 );
+	panelCtrl1->Add( updateMode1, 0, wxALL|wxALIGN_CENTER_VERTICAL, 5 );
+
+	UpdateButton1 = new wxButton( panelCtrl1->GetStaticBox(), wxID_ANY, wxT("刷新"), wxDefaultPosition, wxDefaultSize, 0 );
+	panelCtrl1->Add( UpdateButton1, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
+
+
+	bSizer->Add( panelCtrl1, 0, wxEXPAND, 5 );
+
+
+	bSizer1->Add( bSizer, 1, wxEXPAND, 5 );
 
 	text = new wxRichTextCtrl( this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_READONLY|wxVSCROLL|wxHSCROLL|wxNO_BORDER|wxWANTS_CHARS );
-	bSizer->Add( text, 1, wxEXPAND | wxALL, 5 );
+	bSizer1->Add( text, 1, wxEXPAND | wxALL, 5 );
 
 
-	this->SetSizer( bSizer );
+	this->SetSizer( bSizer1 );
 	this->Layout();
 }
 
@@ -193,7 +195,7 @@ GridWnd::~GridWnd()
 {
 }
 
-MyPanel10::MyPanel10( wxWindow* parent, wxWindowID id, const wxPoint& pos, const wxSize& size, long style, const wxString& name ) : wxPanel( parent, id, pos, size, style, name )
+DataView::DataView( wxWindow* parent, wxWindowID id, const wxPoint& pos, const wxSize& size, long style, const wxString& name ) : wxPanel( parent, id, pos, size, style, name )
 {
 	wxBoxSizer* bSizer;
 	bSizer = new wxBoxSizer( wxVERTICAL );
@@ -206,7 +208,20 @@ MyPanel10::MyPanel10( wxWindow* parent, wxWindowID id, const wxPoint& pos, const
 	this->Layout();
 }
 
-MyPanel10::~MyPanel10()
+DataView::~DataView()
+{
+}
+
+WhiteBoard::WhiteBoard( wxWindow* parent, wxWindowID id, const wxPoint& pos, const wxSize& size, long style, const wxString& name ) : wxPanel( parent, id, pos, size, style, name )
+{
+	bSizer = new wxBoxSizer( wxVERTICAL );
+
+
+	this->SetSizer( bSizer );
+	this->Layout();
+}
+
+WhiteBoard::~WhiteBoard()
 {
 }
 
@@ -216,15 +231,6 @@ CascadeWnd::CascadeWnd( wxWindow* parent, wxWindowID id, const wxPoint& pos, con
 	bSizer21 = new wxBoxSizer( wxVERTICAL );
 
 	ListPage = new wxListbook( this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxLB_DEFAULT );
-	m_panel000 = new wxPanel( ListPage, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
-	wxBoxSizer* pb000;
-	pb000 = new wxBoxSizer( wxVERTICAL );
-
-
-	m_panel000->SetSizer( pb000 );
-	m_panel000->Layout();
-	pb000->Fit( m_panel000 );
-	ListPage->AddPage( m_panel000, wxT("a page"), false );
 	#ifdef __WXGTK__ // Small icon style not supported in GTK
 	wxListView* ListPageListView = ListPage->GetListView();
 	long ListPageFlags = ListPageListView->GetWindowStyleFlag();
@@ -240,10 +246,18 @@ CascadeWnd::CascadeWnd( wxWindow* parent, wxWindowID id, const wxPoint& pos, con
 
 	this->SetSizer( bSizer21 );
 	this->Layout();
+
+	// Connect Events
+	ListPage->Connect( wxEVT_COMMAND_LISTBOOK_PAGE_CHANGED, wxListbookEventHandler( CascadeWnd::PageChanged ), NULL, this );
+	ListPage->Connect( wxEVT_COMMAND_LISTBOOK_PAGE_CHANGING, wxListbookEventHandler( CascadeWnd::PageChanging ), NULL, this );
 }
 
 CascadeWnd::~CascadeWnd()
 {
+	// Disconnect Events
+	ListPage->Disconnect( wxEVT_COMMAND_LISTBOOK_PAGE_CHANGED, wxListbookEventHandler( CascadeWnd::PageChanged ), NULL, this );
+	ListPage->Disconnect( wxEVT_COMMAND_LISTBOOK_PAGE_CHANGING, wxListbookEventHandler( CascadeWnd::PageChanging ), NULL, this );
+
 }
 
 LogWnd::LogWnd( wxWindow* parent, wxWindowID id, const wxString& title, const wxPoint& pos, const wxSize& size, long style ) : wxDialog( parent, id, title, pos, size, style )
